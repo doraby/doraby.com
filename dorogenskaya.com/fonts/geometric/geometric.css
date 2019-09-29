@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Geometric';
+    src: url('geometric.eot');
+    src: url('geometric.eot?#iefix') format('embedded-opentype'),
+         url('geometric.woff') format('woff'),
+         url('geometric.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}

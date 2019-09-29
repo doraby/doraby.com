@@ -1,0 +1,343 @@
+@import "http://webfonts.ru/import/lato.css";
+
+
+body{
+  background: black ;
+  margin: 0;
+  font-family: 'lato', sans-serif;
+  color: white;
+
+}
+
+
+.wrapper-animate{
+    position: absolute;
+    overflow: hidden;
+    width: 100%;
+}
+.head{
+  margin:10px 0 60px 0;
+    position: relative;
+  }
+	.head__logo{
+	  float: left;
+	  padding: 0px 0px 0px 13px;
+      margin-top: 13px;
+	  }
+    .logo{
+        fill: white;
+    }
+		.logo:hover{
+			fill:red;
+		}
+	.head__title{
+	  display: inline-block;
+	  margin:12px 0 0 45px;
+	  color: white;
+	  }
+		.head__title_up{
+		  font-size: 25px;
+		  text-transform: uppercase;
+		  letter-spacing: 6px;
+		  }
+		.head__title_down{
+		  font-size: 11px;
+		  text-transform: uppercase;
+		  letter-spacing: 1px;
+		  }
+.about{
+  list-style-type: none;
+  overflow: hidden;
+  padding:0;
+  }
+	.about li{
+	  float: left;
+	  margin: 0 15px 0 0;
+	  line-height: 1.4;
+	  }
+
+	.about__contact a{
+	  color: red;
+	  text-decoration: none;
+	  transition:all .3s ease-in-out;
+	  }
+	    .about__contact a:hover{
+		  color: red;
+		  text-decoration: underline;
+		  }
+
+.nav{
+	  float: left;
+	  font-size: 13px;
+	  list-style-type: none;
+	  margin: 0;
+	  padding: 0 0 0 10px;
+    position: relative;
+
+}
+	.nav__link{
+		  text-decoration: none;
+		  line-height: 2.5;
+		  padding: 7px 7px 7px 7px;
+		  border: 1px solid transparent;
+		  color: white;
+		  transition: all 1s easy;
+		  }
+		.active-state{
+			  background: white;
+			  color: black;
+			  }
+	.nav__link:hover{
+		 border-color: white;
+		 color: red;
+	     }
+	.nav__link:active{
+	  background-color: white;
+	  color: black;
+	  }
+.sections{
+  margin: 56px 0 0 123px;
+  overflow: hidden;
+  }
+	.section{
+	  position: relative;
+	  padding: 8px 20px;
+	  float: left;
+	  width: 240px;
+	  height: 248px;
+	  background-color: red;
+	  overflow: hidden;
+	  margin: 0 18px 18px 0;
+        color: #fff;
+        text-decoration: none;
+        font-size: 12px;
+	  }
+	.section_big{
+	  position: relative;
+	  float: left;
+	  width: 538px;
+	  height: 248px;
+	  background-color: red;
+	  margin: 0 18px 18px 0;
+	  padding: 8px 20px;
+	  overflow: hidden;
+	  }
+		.section p{
+		  font-size: 13px;
+		  }
+		.section__border{
+		  position: absolute;
+		  border: 3px solid white;
+		  left: 9px;
+		  right: 9px;
+		  top: 9px;
+		  bottom: 9px;
+		  opacity: 0;
+		  transition:all .3s ease-in-out;
+		  }
+		.section__button{
+		  position: absolute;
+		  background: white;
+		  bottom: 0;
+		  right: 0;
+		  padding: 8px 25px;
+		  display: inline-block;
+		  font-size: 13px;
+		  text-transform: uppercase;
+		  color:red;
+		  }
+		.section:hover .section__border{
+		  opacity: 1;
+		  }
+
+		.section__tag{
+		  font-size: 13px;
+		  line-height: 2px;
+		  color: white;
+           display: block;
+           margin: 10px 0 6px;
+           position: relative;
+		  }
+		.section__sub-title{
+		  font-size: 25px;
+          font-weight: 400;
+          text-transform: uppercase;
+		  line-height: 36px;
+		  margin:0;
+          position: relative;
+            letter-spacing: 2px;
+            color: white;
+            transition:all .3s ease-in-out;
+            text-decoration: none;
+            border-bottom:1px solid rgba(255,255,255,0);
+		  }
+        .section__text{
+            font-size: 15px;
+            line-height: 20px;
+            display: block;
+        }
+
+            .image_abs{
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        .wrapper_section__animation{
+            position: absolute;
+            top: -4px;
+            right: 18px;
+            width: 242px;
+            height: 254px;
+            overflow: hidden;
+
+        }
+        .section__animation{
+            position: absolute;
+            top: 24px;
+            left: 0;
+            /*-webkit-transition:all 18s ease-out;*/
+            transition:all 14s ease-out;
+
+            /*-webkit-transition: top 1s ease-out 5s;*/
+            /*-moz-transition: top 1s ease-out 5s;*/
+            /*-o-transition: top 1s ease-out 5s;*/
+            /*transition: top 1s ease-out 5s;*/
+            }
+        .section:hover .section__animation{
+            left: -300px;
+        }
+		.section:hover .section__sub-title{
+		  border-bottom:1px solid rgba(255,255,255,1);
+		  }
+            .zzima{
+                background: url(../images/zzima.jpg) no-repeat 0 0;
+            }
+                /*.zzima:hover {*/
+                    /*-webkit-filter: hue-rotate(130deg);*/
+                    /*filter: hue-rotate(130deg);*/
+                /*}*/
+            .zzima_graph{
+                background: url(../images/zzima_graph.jpg) no-repeat 0 0;
+            }
+            .level-up{
+                background: url(../images/levelup.jpg)no-repeat 0 0;
+            }
+			.hellominsk{
+			   background: url(../images/hellominsk.jpg)no-repeat 0 0;
+			   }
+			.lowenbrau{
+			   background: url(../images/lowenbrau2_2.jpg) no-repeat 0 0;
+			   }
+			.oriflame{
+			   background: url(../images/orif.jpg) no-repeat 0 0;
+			   }
+
+            .zul{
+                background: url(../images/zul.jpg) no-repeat 0 0;
+            }
+
+            .offf{
+			   background: url(../images/offf.jpg) no-repeat 0 0;
+			   }
+
+            .zzima_live{
+                  background: url(../images/zzima_live.jpg) no-repeat 0 0;
+              }
+            .facebook{
+               background: url(../images/ten.jpg) no-repeat 0 0;
+               }
+			.blank{
+			   background: url(../images/mccafe.jpg) no-repeat 0 0;
+			   }
+            .gzhel{
+                background: url(../images/gzhel2.jpg) no-repeat 0 0;
+            }
+            /*.gzhel:hover {*/
+            /*background: url(../images/gzhel_hover.gif) no-repeat 0 0;*/
+            /*}*/
+            .belpattern{
+                background: url(../images/belpattern.jpg) no-repeat 0 0;
+            }
+
+			.doraby{
+			   background: url(../images/doraby3.jpg) no-repeat 0 0;
+			   }
+				.doraby:hover {
+				   background: url(../images/doraby4.gif) no-repeat 0 0;
+				   }
+
+.clear{
+	clear:both;
+    }
+.footer{
+   font-size: 11px;
+   position: relative;
+   top: -31px;
+   margin-left: 16px;
+
+}
+@media screen and (max-width: 700px){
+
+	  .nav{
+	    overflow:hidden;
+	    float: none;
+	    width: 270px;}
+		  .nav li {
+		    float:left;
+		    }
+	  .sections{
+	    margin: 25px 0 0 15px;
+	    }
+		  .section_big{
+		    width: 240px;
+		    }
+
+	  .head{
+	    margin: 10px 0px 20px;
+	    }
+	  	  .head__title{
+		    display: block;
+		    margin:28px 0 0 14px;
+		    /*border-bottom: 1px solid white;*/
+		    padding-bottom: 1px;
+	        }
+		  .head__logo{
+			 float: none
+			 }
+		  .head__title_up{
+		    width:270px;
+		    }
+		    .about li {
+               float: none;
+               }
+     .footer{
+        top: -4px;
+        }
+    .none{
+        display: none;
+    }
+
+}
+canvas {
+    display: block;
+    outline: 0px;
+    margin-bottom: 1.5em;
+    image-rendering: -webkit-optimize-contrast !important;
+}
+.container{
+    position: relative;
+    z-index: 1;
+}
+.processing{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+.processing_ov{
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 1600px;
+    min-width: 320px;
+
+}

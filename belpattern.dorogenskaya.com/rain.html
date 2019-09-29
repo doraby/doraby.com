@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, user-scalable=false;">
+    <meta name="Generator" content="Processing"/>
+    <meta property="og:title" content="Беларускія узоры"/>
+    <meta property="og:description" content="Узоры тканых і вышываных вырабаў —
+зашыфраваны аповяд. Там, як у добрай кніжцы можно дазнацца пра жыццё людзей i жывёлы,
+пра сонейка і зоркі, пра хваробу і пра здароўе, пра дзявочую долю і нядолю, пра ўсё, што есць у жыцці."/>
+    <meta property="og:image" content="https://dl.dropboxusercontent.com/u/3621326/ogg_img.jpg"/>
+    <meta property="og:description"     content="Узоры тканых і вышываных вырабаў —
+зашыфраваны аповяд. Там, як у добрай кніжцы можно дазнацца пра жыццё людзей i жывёлы,
+пра сонейка і зоркі, пра хваробу і пра здароўе, пра дзявочую долю і нядолю, пра ўсё, што есць у жыцці." />
+    <meta property="og:url" content="http://belpattern.dorogenskaya.com" />
+
+    <title>Беларускія узоры - Дождж</title>
+
+
+    <link href="css/styles.css" rel='stylesheet' type='text/css'>
+
+    <script type="text/javascript" src="//vk.com/js/api/openapi.js?115"></script>
+
+    <script type="text/javascript">
+        VK.init({apiId: 4645333, onlyWidgets: true});
+    </script>
+    <script src="processing/processing.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        // convenience function to get the id attribute of generated sketch html element
+        function getProcessingSketchId() {
+            return 'build';
+        }
+    </script>
+</head>
+
+
+<body>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v2.0";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<div class="menu">
+    <div class="menu__inner">
+        <div class="menu-links">
+            <div class="table">
+                <a class="tc menu-link menu-link_1" href="ground.html"><span class="bgcolor">зямля</span></a>
+            </div>
+            <div class="table">
+                <a class="tc menu-link menu-link_2" href="sun.html"> <span class="bgcolor">сонца</span></a>
+            </div>
+            <div class="table">
+                <a class="tc menu-link menu-link_5 active" href="rain.html"><span class="bgcolor">дождж</span></a>
+            </div>
+
+            <div class="table">
+                <a class="tc menu-link menu-link_4" href="spring.html"><span class="bgcolor">жыццё (вясна)</span></a>
+            </div>
+            <div class="table">
+                <a class="tc menu-link menu-link_3 " href="star.html"><span class="bgcolor" >зорка (чалавек)</span></a>
+            </div>
+            <div class="table">
+                <a class="tc menu-link menu-link_6" href="kupalle.html"><span class="bgcolor">купала</span></a>
+            </div>
+            <div class="table">
+                <a class="tc menu-link menu-link_7" href="uradzhai.html"><span class="bgcolor">ураджай</span></a>
+            </div>
+
+        </div>
+    </div>
+    <div class="menu__btn">
+        <a class="btn_up" href=""></a>
+        <a class="btn_down" href=""></a>
+    </div>
+    <a class="info-box" href="">
+        <span class="table">
+            <span class="tc">
+                <span class="info_title">Аб праекце</span>
+            </span>
+        </span>
+    </a>
+</div>
+<div class="content">
+    <audio autoplay="" id="sound">
+        <source src="audio/Cranes.ogg" type="audio/ogg; codecs=vorbis">
+        <source src="audio/Cranes.mp3" type="audio/mpeg">
+        Тег audio не поддерживается вашим браузером.
+
+    </audio>
+    <div class="player-title">
+        <div class="wrapper-player-control">
+            <a class="player-control" href=""></a>
+        </div>
+        <div class="sound-name"><a href="http://troitsa.net/" target="_blank" class="red">этна-трыо ТРОІЦА</a> — Журавы</div>
+    </div>
+
+    <div class="player-title wrapper-soc">
+        <div class="wrapper-player-control">
+            <span class="favorite" ></span>
+        </div>
+        <div class="sound-name soc">
+            <div class="ib ib_facebook">
+                <div class="fb-like" data-href="http://belpattern.dorogenskaya.com/" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+            </div>
+            <div class="ib">
+
+                <div id="vk_like"></div>
+                <script type="text/javascript">
+                    VK.Widgets.Like("vk_like", {type: "mini"});
+                </script>
+            </div>
+            <div class="ib ib_twitter">
+                <a href="https://twitter.com/share" class="twitter-share-button" data-via="DovgalenokSasha">Tweet</a>
+                <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <div class="wrapper-animate">
+
+        <canvas id="build" data-processing-sources="processing/build_rain.pde"
+                width="1366" height="768">
+            <p>Ваш браузер не поддерживает canvas. Попробуйте Хром или, на худой конец, Фаерфокс.</p>
+        </canvas>
+        <noscript>
+            <p>JavaScript is required to view the contents of this page.</p>
+        </noscript>
+    </div>
+
+    <div class="wrapper-preview">
+        <div class="preview">
+            <div class="preview__box">
+                <img class="preview__svg" src="img/rain_main.svg" alt=""/>
+
+                <div class="preview__title">Дождж</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="rotate-box rotate-90">
+        <div class="popup">
+            <div class="popup__body">
+                <div class="popup__title">
+                 <div class="popup__title__body">
+                     <img class="preview__svg" src="img/rain_main.svg" alt=""/>
+
+                                     <h2>Дождж</h2>
+                 </div>
+
+                </div>
+                <div class="carousel">
+
+                    <div class="carousel__item">
+                        <div class="table">
+                            <div class="tc">
+                                <img class="item_pic" src="img/rain_4.svg" alt=""/>
+
+                                <div class="f-22">
+                                    Матывы з чатырох пялёсткаў, размешчаныя ў&nbspцэнтры і&nbspпа перыметры майстрыхі называлі ўзорам дажджу.
+                                    Вялікі крыжападобны ўзор з чатырох сегментных пялёсткаў называюць то дожджыкам,
+                                    <br/>то Дажджбогам.
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel__item">
+                        <div class="table">
+                            <div class="tc">
+                                <div class="f-22">
+                                    Хоць узор дажджу складаецца з аднолькавых элементаў, але ўсе яны маюць сваё прызначэнне.
+                                    <br/> Адзін з іх павінен забяспечваць ураджай <span class="red">жыта на ніве</span>, <br/> другі — <span class="red">сена на лузе</span>, трэці — <span class="red">паўнаводнасць рэк</span>, чацвёрты — <span class="red">добрую дразніну ў лесе</span>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel__item">
+                        <div class="table">
+                            <div class="tc">
+                                <div class="f-22 ">
+                                    Замова на дождж:
+                                    <br/>Дожджык, дожджык, дзергані,
+                                    <br/>прыязджай к нам на кані.
+                                    <br/>Дай свежую вадзіцу,
+                                    <br/>Дай нам цёплую расіцу,
+                                    <br/>Хай траўка расце, хай жыта цвіце,
+                                    <br/>хай гавяда сыцеець,
+                                    <br/>хай парсюк таўсцеець.                             </div>
+                                <div class="f-17 red"><a class="item_map" target="_blank" href="http://eb.by/sJN">
+                                    Барысаўскі раен </a></div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <!--<div class="carousel__item">-->
+                        <!--<div class="table">-->
+
+                            <!--<div class="tc">-->
+
+                                    <!--<img class="item_pic_big" src="img/rain_pic.jpg" alt=""/>-->
+
+                                <!--<div class="f-17 red"><a class="item_map" href="http://eb.by/WyZ">-->
+                                    <!--<br/></a></div>-->
+
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <div class="carousel__item">
+                        <div class="table">
+                            <div class="tc">
+                                <div class="f-22">
+                                    Была ў нас гарачыня, смаліла сонца. <br/> Выгаралі на ніве жыта, авёс ды ячмень.
+                                    <br/> Старыя людзі падказалі, <br/>і я вышыла гэты ўзор, каб даў Бог дождж.
+                                </div>
+                                <div class="f-13">Е. Копац</div>
+                                <div class="f-17 red"><a class="item_map" target="_blank" href="http://eb.by/sJG">
+                                    Свіслач Гродзенскай вобласці</a></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+                </div>
+                <div class="paging"></div>
+                <a class="btn-carousel btn-carousel_left" href=""></a>
+                <a class="btn-carousel btn-carousel_right" href=""></a>
+            </div>
+            <a class="close" href=""></a>
+
+        </div>
+    </div>
+
+</div>
+<div class="fix-wrapper">
+    <div class="desc-box">
+        <div class="desc-box__body">
+            <div class="table table_h">
+                <div class="tc">
+                    <div class="wrapper-close">
+                        <a class="close-info" href=""></a>
+
+                    </div>
+                    <h2>Аб праекце</h2>
+                    <h4>
+                        Разработка
+                    </h4>
+                    <p class="f-22">
+                        Дызайн, вэбтэхналогіі — Дарагенская Алена <br/>
+                        Вэбтэхналогіі — Даўгалёнак Аляксандр
+
+                    </p>
+                    <h4 >
+                        Музыка
+                    </h4>
+
+                    <a href="http://shuma.by/" target="_blank" class="f-22 red_link">Shuma</a><br/>
+                    <a href="http://troitsa.net/" target="_blank" class="f-22 red_link">Этна-трыо ТРОІЦА</a><br/>
+
+
+
+                    <h4 >
+                        Крыніцы
+                    </h4>
+
+                    <a href="http://jivebelarus.net/our-heritage/belarusian-ornament.html" target="_blank" class="f-22 red_link">Кацар М.С. Беларускі арнамент</a><br/>
+                    <a href="http://ornaments.shuma.by/" target="_blank" class="f-22 red_link">ornaments.shuma.by</a><br/>
+
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="mobile">
+    <span class="info_title">Прабачце, калi ласка</span>
+    <p class="f-22">
+        На жаль, праект не даступны на мабільных прыладах.
+        Паспрабуйце зайсці з дэсктопнага браузера.
+
+    </p>
+</div>
+<script src="js/jquery.carouFredSel-6.2.1-packed.js"></script>
+<script src="js/script.js"></script>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter27168599 = new Ya.Metrika({id:27168599,
+                    webvisor:true,
+                    clickmap:true});
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+                s = d.createElement("script"),
+                f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/27168599" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+</body>
+</html>

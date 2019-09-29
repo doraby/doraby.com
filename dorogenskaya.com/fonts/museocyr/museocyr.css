@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Museo Cyr';
+    src: url('museo_cyrillic_500.eot');
+    src: url('museo_cyrillic_500.eot?#iefix') format('embedded-opentype'),
+         url('museo_cyrillic_500.woff') format('woff'),
+         url('museo_cyrillic_500.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
