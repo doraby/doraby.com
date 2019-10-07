@@ -7,10 +7,11 @@ class Ball {
         this.loc = createVector(x, y);
         this.velocity = createVector(1, 5);
         this.firstX = x;
+        this.firstY = y;
         this.distance = distance;
     }
 
-    move () {
+    bounce () {
         this.loc.add(this.velocity);
         if ((this.loc.x > width - this.r/2) || (this.loc.x < 0 + this.r/2)) {
             this.velocity.x = this.velocity.x * -1;
@@ -19,6 +20,7 @@ class Ball {
             this.velocity.y = this.velocity.y * -1;
         }
     }
+
 
     clicked (x,y) {
         let d = dist (x, y, this.x, this.y);
@@ -43,19 +45,26 @@ class Ball {
     }
 
     parallax (x, y) {
-        let halfWidth = width/2,
+        let
+            halfWidth = width,
+            halfHeight = height,
             // do the same for y
-            isNegative = x - halfWidth > 0 ? 1 : -1,
-            mapDistance = Math.abs(x - halfWidth) / halfWidth * this.distance;
-            this.x = this.firstX + mapDistance * isNegative;
+            isNegative = x - halfWidth > 0 ? -1 : 1,
+            isNegativeY = y - halfHeight > 0 ? -1 : 1,
+
+            mapDistance = Math.abs(x - halfWidth) / halfWidth * this.distance,
+            mapDistanceY = Math.abs(y - halfHeight) / halfHeight * this.distance;
+
+        this.x = this.firstX + mapDistance * isNegative;
+        this.y = this.firstY + mapDistanceY * isNegativeY;
+
     }
 
     show (x, y) {
         stroke(187, 202, 253);
         fill(this.fill);
+        let circle = ellipse (this.x, this.y, this.r, this.r);
 
-        ellipse (this.x, this.y, this.r, this.r);
-        ellipse (mouseX, mouseY, 4, 4);
         let d = dist(mouseX, mouseY, this.x, this.y);
         if (d<200){
             stroke(255,90);
