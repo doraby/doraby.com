@@ -21,7 +21,6 @@ class Ball {
         }
     }
 
-
     clicked (x,y) {
         let d = dist (x, y, this.x, this.y);
         if(d < this.r){
@@ -41,7 +40,7 @@ class Ball {
     flicker (){
         this.x = this.x + random(-0.1,0.1);
         this.y = this.y +  random(-0.1,0.1);
-        this.r = this.r + random(-0.4,0.4);
+        this.r = this.r + random(-0.6,0.6);
     }
 
     parallax (x, y) {
