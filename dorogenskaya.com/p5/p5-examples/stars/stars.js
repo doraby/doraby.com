@@ -16,9 +16,10 @@ function setup() {
         let y = random(height);
         let r = random(2,10);
         let distance = random(25, 100);
-        bubbles[i] = new Ball(x, y, r, distance, 255);
+        bubbles[i] = new Star(x, y, r, distance, 255);
     }
 }
+
 function mousePressed() {
     for(let i = 0; i < bubbles.length; i++){
         bubbles[i].clicked(mouseX, mouseY);
@@ -27,7 +28,6 @@ function mousePressed() {
 
 function draw() {
     background(187, 202, 253);
-    console.log(bubbles);
 
     for(let i = 0; i < bubbles.length; i++){
         bubbles[i].hovered(mouseX, mouseY);
