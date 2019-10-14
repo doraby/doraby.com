@@ -14,7 +14,7 @@ function setup() {
     for(let i = 0; i < 50; i++){
         let x = random(width);
         let y = random(height);
-        let r = random(2,10);
+        let r = random(4,10);
         let distance = random(25, 100);
         bubbles[i] = new Star(x, y, r, distance, 255);
     }

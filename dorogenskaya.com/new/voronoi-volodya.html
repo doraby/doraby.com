@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas</title>
+    <script src="https://unpkg.com/d3-delaunay@5.1.6/dist/d3-delaunay.js"></script>
+    <script src="../p5/js-examples/auto.js"></script>
+
+</head>
+<body>
+<div>
+    <canvas id="myCanvas" />
+</div>
+<script>
+    const canvas = document.getElementById("myCanvas");
+    app(canvas, d3.Delaunay, window.devicePixelRatio);
+</script>
+</body>
+</html>

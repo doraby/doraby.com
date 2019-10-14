@@ -47,7 +47,6 @@ class Star {
         let
             halfWidth = width,
             halfHeight = height,
-            // do the same for y
             isNegative = x - halfWidth > 0 ? -1 : 1,
             isNegativeY = y - halfHeight > 0 ? -1 : 1,
 
@@ -56,7 +55,6 @@ class Star {
 
         this.x = this.firstX + mapDistance * isNegative;
         this.y = this.firstY + mapDistanceY * isNegativeY;
-
     }
 
     show (x, y) {
@@ -67,27 +65,8 @@ class Star {
         let d = dist(mouseX, mouseY, this.x, this.y);
         if (d<150){
             stroke(255,90);
-            let x = this.x; // Current x-coordinate
-            let y = this.y; // Current y-coordinate
-            let endX = mouseX; // Final x-coordinate
-            let endY = mouseY; // Final y-coordinate
-            let distX = endX - x; // X-axis distance to move
-            let distY = endY - y; // Y-axis distance to move
-
-            let step = 0.03; // Size of each step along the path
-            let pct = 0.1; // Percentage traveled (0.0 to 1.0)
-
-            pct += step;
-            x = x + pct * distX;
-            y = y + pct * distY;
-
-            fill(255);
             ellipse(x, y, 2, 2);
-            pct = 0.5;
-            endX = mouseX; // Final x-coordinate
-            endY = mouseY; // Final y-coordinate
-            distX = endX - x; // X-axis distance to move
-            distY = endY - y; // Y-axis distance to move
+            line(mouseX,mouseY, this.x, this.y);
         }
     }
 }
