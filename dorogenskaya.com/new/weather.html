@@ -57,7 +57,7 @@
     .legend-line { width: 28px; height: 2px; border-radius: 2px; }
     .legend-line.current { background: #f78166; }
     .legend-line.avg { height: 0; border-top: 2px dashed #6e7681; }
-    .chart-wrap { position: relative; height: 380px; }
+    .chart-wrap { position: relative; height: 430px; }
 
     /* ── Table ── */
     .table-wrap { overflow-x: auto; }
@@ -174,8 +174,10 @@
       <button id="btn-next">Вперёд →</button>
     </div>
     <div class="chart-legend">
-      <div class="legend-item"><div class="legend-line current"></div><span>Факт / прогноз</span></div>
+      <div class="legend-item"><div class="legend-line current"></div><span>Макс. т-ра</span></div>
+      <div class="legend-item"><div class="legend-line" style="border-top:2px dashed #79c0ff;height:0;background:none"></div><span>Мин. т-ра</span></div>
       <div class="legend-item"><div class="legend-line avg"></div><span>Среднее 2021–2025</span></div>
+      <div class="legend-item"><div style="width:2px;height:14px;background:rgba(100,116,139,0.4);border-radius:1px"></div><span>Пн</span></div>
     </div>
     <div class="chart-wrap">
       <div class="spinner" id="chart-spinner">Загрузка данных…</div>
@@ -187,12 +189,6 @@
   <div class="card">
     <div id="archive-title" class="section-title">Архив за текущий месяц</div>
     <div id="archive-container"><div class="spinner">Загрузка архива…</div></div>
-  </div>
-
-  <!-- Forecast -->
-  <div class="card">
-    <div class="section-title">Прогноз — Максимальные температуры на 14 дней</div>
-    <div id="forecast-grid" class="forecast-grid"><div class="spinner">Загрузка прогноза…</div></div>
   </div>
 
   <div class="attribution">
@@ -234,10 +230,54 @@ const RU_MONTHS     = ['январь','февраль','март','апрель'
 const RU_MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const RU_MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 
+/* ── Moon phase ── */
+function getMoonPhaseDays(dateStr) {
+  const refNewMoon = new Date('2000-01-06T18:14:00Z');
+  const cycleMs = 29.53058867 * 864e5;
+  const elapsed = ((new Date(dateStr+'T12:00:00') - refNewMoon) % cycleMs + cycleMs) % cycleMs;
+  return elapsed / 864e5; // 0–29.53 days through cycle
+}
+function moonEmoji(p) {
+  const f = p / 29.53058867;
+  if (f<0.0625||f>=0.9375) return '🌑';
+  if (f<0.1875) return '🌒';
+  if (f<0.3125) return '🌓';
+  if (f<0.4375) return '🌔';
+  if (f<0.5625) return '🌕';
+  if (f<0.6875) return '🌖';
+  if (f<0.8125) return '🌗';
+  return '🌘';
+}
+const isWaxing = p => p < 14.765; // first half of cycle
+
+/* ── Moon plugin ── */
+const moonPlugin = {
+  id: 'moonPlugin',
+  afterDraw(chart) {
+    const data = chart._moonData;
+    if (!data) return;
+    const {ctx, scales:{x:xs}, height} = chart;
+    ctx.save();
+    ctx.font = '11px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    data.forEach((d,i) => {
+      const x = xs.getPixelForValue(i);
+      ctx.fillText(d.moon, x, height - 10);
+      if (d.plant) ctx.fillText('🌱', x, height - 24);
+    });
+    ctx.restore();
+  }
+};
+Chart.register(moonPlugin);
+
 /* ── Global state ── */
 const G = {
   lat: 50.0647, lon: 19.9450, cityName: 'Краков',
   allActual: new Map(),
+  allMin: new Map(),      // date → temperature_2m_min (2026 + forecast)
+  allPrecip: new Map(),   // date → precipitation_sum (2026)
+  precipCache: new Map(), // "YYYY-MM" → Map(date → precip)  for historical months
   avgByDay: {},
   chartInst: null,
   viewYear: new Date().getFullYear(),
@@ -281,7 +321,7 @@ const urlArchive = (s,e,vars) =>
 
 /* ── Build global stores ── */
 function buildGlobalData(archiveYear, forecastData, hist5yr) {
-  G.allActual.clear();
+  G.allActual.clear(); G.allMin.clear(); G.allPrecip.clear(); G.precipCache.clear();
   Object.keys(G.avgByDay).forEach(k => delete G.avgByDay[k]);
 
   if (hist5yr?.daily) {
@@ -299,13 +339,21 @@ function buildGlobalData(archiveYear, forecastData, hist5yr) {
   }
 
   if (archiveYear?.daily) {
-    const {time, temperature_2m_max} = archiveYear.daily;
-    time.forEach((dt,i) => { const v=temperature_2m_max[i]; if(v!==null&&!isNaN(v)) G.allActual.set(dt,v); });
+    const {time, temperature_2m_max, temperature_2m_min, precipitation_sum} = archiveYear.daily;
+    time.forEach((dt,i) => {
+      const v=temperature_2m_max[i]; if(v!==null&&!isNaN(v)) G.allActual.set(dt,v);
+      const mn=temperature_2m_min?.[i]; if(mn!==null&&mn!==undefined) G.allMin.set(dt,mn);
+      const p=precipitation_sum?.[i]; if(p!==null&&p!==undefined) G.allPrecip.set(dt,p);
+    });
   }
 
   if (forecastData?.daily) {
-    const {time, temperature_2m_max} = forecastData.daily;
-    time.forEach((dt,i) => { const v=temperature_2m_max[i]; if(!G.allActual.has(dt)&&v!==null&&!isNaN(v)) G.allActual.set(dt,v); });
+    const {time, temperature_2m_max, temperature_2m_min, precipitation_sum} = forecastData.daily;
+    time.forEach((dt,i) => {
+      const v=temperature_2m_max[i]; if(!G.allActual.has(dt)&&v!==null&&!isNaN(v)) G.allActual.set(dt,v);
+      const mn=temperature_2m_min?.[i]; if(!G.allMin.has(dt)&&mn!==null&&mn!==undefined) G.allMin.set(dt,mn);
+      const p=precipitation_sum?.[i]; if(!G.allPrecip.has(dt)&&p!==null&&p!==undefined) G.allPrecip.set(dt,p);
+    });
   }
 }
 
@@ -313,14 +361,25 @@ function buildGlobalData(archiveYear, forecastData, hist5yr) {
 function renderChart() {
   const {viewYear, viewMonth} = G;
   const days = new Date(viewYear, viewMonth+1, 0).getDate();
-  const labels=[], dsActual=[], dsAvg=[];
+  const labels=[], dsActual=[], dsMin=[], dsAvg=[];
+  const monthKey = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}`;
+  const precipMonth = G.precipCache.get(monthKey) || G.allPrecip;
+  const mondayIndices = []; // indices of Mondays for vertical lines
+  const moonData = [];
 
   for (let d=1; d<=days; d++) {
     const dt = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const mmdd = dt.slice(5);
+    const dow = new Date(dt+'T12:00:00').getDay(); // 0=Sun,1=Mon
     labels.push(d);
     dsActual.push(G.allActual.has(dt) ? +G.allActual.get(dt).toFixed(1) : null);
+    dsMin.push(G.allMin.has(dt) ? +G.allMin.get(dt).toFixed(1) : null);
     dsAvg.push(G.avgByDay[mmdd]!==undefined ? G.avgByDay[mmdd] : null);
+    if (dow===1) mondayIndices.push(d-1); // 0-based index
+
+    const phase = getMoonPhaseDays(dt);
+    const precip = precipMonth.get(dt) ?? 0;
+    moonData.push({ moon: moonEmoji(phase), plant: isWaxing(phase) && precip > 1 });
   }
 
   document.getElementById('chart-month-label').textContent = `${RU_MONTHS[viewMonth]} ${viewYear}`;
@@ -332,18 +391,39 @@ function renderChart() {
   document.getElementById('chart-spinner').style.display = 'none';
   document.getElementById('tempChart').style.display = 'block';
 
+  // Monday lines plugin (inline, uses closure over mondayIndices)
+  const mondayPlugin = {
+    id: 'mondayLines',
+    beforeDatasetsDraw(chart) {
+      const {ctx, chartArea:{top,bottom}, scales:{x:xs}} = chart;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(100,116,139,0.35)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([]);
+      mondayIndices.forEach(i => {
+        const x = xs.getPixelForValue(i);
+        ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+
   if (G.chartInst) G.chartInst.destroy();
   const ctx = document.getElementById('tempChart').getContext('2d');
   G.chartInst = new Chart(ctx, {
     type: 'line',
+    plugins: [mondayPlugin],
     data: { labels, datasets: [
-      { label: 'Макс. т-ра', data: dsActual, borderColor: '#f78166', backgroundColor: 'rgba(247,129,102,0.1)',
-        borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0.25, fill: true, spanGaps: false },
+      { label: 'Макс. т-ра', data: dsActual, borderColor: '#f78166', backgroundColor: 'rgba(247,129,102,0.08)',
+        borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25, fill: true, spanGaps: false, order: 1 },
+      { label: 'Мин. т-ра', data: dsMin, borderColor: '#79c0ff', backgroundColor: 'transparent',
+        borderWidth: 1.5, borderDash: [3,3], pointRadius: 0, pointHoverRadius: 4, tension: 0.25, spanGaps: false, order: 2 },
       { label: 'Среднее 2021–2025', data: dsAvg, borderColor: '#484f58', borderWidth: 1.5,
-        borderDash: [5,4], backgroundColor: 'transparent', pointRadius: 0, pointHoverRadius: 3, tension: 0.3 }
+        borderDash: [5,4], backgroundColor: 'transparent', pointRadius: 0, pointHoverRadius: 3, tension: 0.3, order: 3 }
     ]},
     options: {
       responsive: true, maintainAspectRatio: false,
+      layout: { padding: { bottom: 36 } },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
@@ -352,7 +432,15 @@ function renderChart() {
           titleColor: '#e6edf3', bodyColor: '#8b949e', padding: 10,
           callbacks: {
             title: ([item]) => `${item.label} ${RU_MONTHS_GEN[viewMonth]} ${viewYear}`,
-            label: item => item.raw===null ? null : `${item.dataset.label}: ${item.raw>=0?'+':''}${item.raw}°C`
+            label: item => {
+              if (item.raw===null) return null;
+              const dt = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(item.label).padStart(2,'0')}`;
+              const p = (G.precipCache.get(monthKey)||G.allPrecip).get(dt);
+              const moon = moonEmoji(getMoonPhaseDays(dt));
+              const precip = p>0.1 ? `  💧 ${p.toFixed(1)} мм` : '';
+              const base = `${item.dataset.label}: ${item.raw>=0?'+':''}${item.raw}°C`;
+              return item.datasetIndex===0 ? base + precip + `  ${moon}` : base;
+            }
           }
         }
       },
@@ -362,6 +450,7 @@ function renderChart() {
       }
     }
   });
+  G.chartInst._moonData = moonData;
 }
 
 /* ── Archive table ── */
@@ -436,7 +525,7 @@ async function loadData() {
   const [forecastData, archiveMonthData, archiveYearData, hist5yr] = await Promise.all([
     fetchJSON(urlForecast()),
     fetchJSON(urlArchive(monthStart(), todayStr(), 'temperature_2m_max,temperature_2m_min,precipitation_sum')),
-    fetchJSON(urlArchive(`${year}-01-01`, dateOffset(-2), 'temperature_2m_max')),
+    fetchJSON(urlArchive(`${year}-01-01`, dateOffset(-2), 'temperature_2m_max,temperature_2m_min,precipitation_sum')),
     fetchJSON(urlArchive('2021-01-01','2025-12-31','temperature_2m_max')),
   ]);
 
@@ -450,7 +539,6 @@ async function loadData() {
 
   renderChart();
   renderArchive(archiveMonthData, forecastData);
-  renderForecast(forecastData);
 }
 
 async function main() {
@@ -459,20 +547,42 @@ async function main() {
     console.error(err);
     document.getElementById('updated-at').textContent = 'Ошибка загрузки данных';
     const msg = `<div class="error-msg">Не удалось загрузить данные.<br><small>${err.message}</small></div>`;
-    ['forecast-grid','archive-container'].forEach(id=>document.getElementById(id).innerHTML=msg);
+    document.getElementById('archive-container').innerHTML = msg;
   }
 }
 
 /* ── Chart navigation ── */
-document.getElementById('btn-prev').addEventListener('click', () => {
-  if (G.viewMonth===0){G.viewYear--;G.viewMonth=11;}else G.viewMonth--;
+async function navigateToMonth(year, month) {
+  G.viewYear = year; G.viewMonth = month;
+  const key = `${year}-${String(month+1).padStart(2,'0')}`;
+  // Fetch precipitation for this month if not cached (historical months)
+  if (!G.precipCache.has(key) && !key.startsWith(`${new Date().getFullYear()}`)) {
+    try {
+      const start = `${key}-01`;
+      const end = new Date(year, month+1, 0).toISOString().slice(0,10);
+      const data = await fetchJSON(urlArchive(start, end, 'precipitation_sum'));
+      const map = new Map();
+      data.daily?.time.forEach((dt,i) => {
+        const p = data.daily.precipitation_sum[i];
+        if (p!==null) map.set(dt, p);
+      });
+      G.precipCache.set(key, map);
+    } catch(e) { G.precipCache.set(key, new Map()); }
+  }
   renderChart();
+}
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  const y = G.viewMonth===0 ? G.viewYear-1 : G.viewYear;
+  const m = G.viewMonth===0 ? 11 : G.viewMonth-1;
+  navigateToMonth(y, m);
 });
 document.getElementById('btn-next').addEventListener('click', () => {
   const n=new Date();
   if (G.viewYear===n.getFullYear()&&G.viewMonth===n.getMonth()) return;
-  if (G.viewMonth===11){G.viewYear++;G.viewMonth=0;}else G.viewMonth++;
-  renderChart();
+  const y = G.viewMonth===11 ? G.viewYear+1 : G.viewYear;
+  const m = G.viewMonth===11 ? 0 : G.viewMonth+1;
+  navigateToMonth(y, m);
 });
 
 /* ── Station modal ── */
