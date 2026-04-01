@@ -177,7 +177,7 @@
       <div class="legend-item"><div class="legend-line current"></div><span>Max temp</span></div>
       <div class="legend-item"><div class="legend-line" style="border-top:2px dashed #79c0ff;height:0;background:none"></div><span>Min temp</span></div>
       <div class="legend-item"><div class="legend-line avg"></div><span>Avg 2021–2025</span></div>
-      <div class="legend-item"><div style="width:2px;height:14px;background:rgba(100,116,139,0.4);border-radius:1px"></div><span>Mon</span></div>
+      <div class="legend-item"><div style="width:2px;height:14px;background:rgba(100,116,139,0.4);border-radius:1px"></div><span>Sun</span></div>
     </div>
     <div class="chart-wrap">
       <div class="spinner" id="chart-spinner">Loading data…</div>
@@ -370,7 +370,7 @@ function renderChart() {
     dsActual.push(G.allActual.has(dt) ? +G.allActual.get(dt).toFixed(1) : null);
     dsMin.push(G.allMin.has(dt) ? +G.allMin.get(dt).toFixed(1) : null);
     dsAvg.push(G.avgByDay[mmdd]!==undefined ? G.avgByDay[mmdd] : null);
-    if (dow===1) mondayIndices.push(d-1); // 0-based index
+    if (dow===0) mondayIndices.push(d-1); // 0-based index
 
     const phase = getMoonPhaseDays(dt);
     const precip = precipMonth.get(dt) ?? 0;
