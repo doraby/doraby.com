@@ -448,73 +448,11 @@ function renderChart() {
   G.chartInst._moonData = moonData;
 }
 
-/* ── Archive table ── */
-function renderArchive(archiveData, forecastData) {
-  const today = todayStr();
-  const now = new Date(), year = now.getFullYear(), month = now.getMonth();
-  document.getElementById('archive-title').textContent = `Архив за ${RU_MONTHS[month]} ${year}`;
-
-  const dataMap = new Map();
-  if (archiveData?.daily?.time) {
-    const {time, temperature_2m_max, temperature_2m_min, precipitation_sum} = archiveData.daily;
-    time.forEach((dt,i) => {
-      if (temperature_2m_max[i]!==null)
-        dataMap.set(dt, {tmax:temperature_2m_max[i], tmin:temperature_2m_min[i], precip:precipitation_sum[i], source:'archive'});
-    });
-  }
-  if (forecastData?.daily?.time) {
-    const {time, temperature_2m_max, temperature_2m_min, precipitation_sum} = forecastData.daily;
-    const pfx = `${year}-${String(month+1).padStart(2,'0')}`;
-    time.forEach((dt,i) => {
-      if (dt.startsWith(pfx) && !dataMap.has(dt))
-        dataMap.set(dt, {tmax:temperature_2m_max[i], tmin:temperature_2m_min[i], precip:precipitation_sum[i], source:'forecast'});
-    });
-  }
-
-  if (dataMap.size===0) { document.getElementById('archive-container').innerHTML='<div class="spinner">Нет данных</div>'; return; }
-
-  const rows = [...dataMap.entries()].sort((a,b)=>b[0].localeCompare(a[0])).map(([dt,val]) => {
-    const d = new Date(dt+'T12:00:00'), mmdd = dt.slice(5), norm = G.avgByDay[mmdd], isToday = dt===today;
-    return `<tr class="${isToday?'t-today':''}">
-      <td>${d.getDate()} ${RU_MONTHS_GEN[d.getMonth()]}${isToday?'<span class="badge-today">сегодня</span>':''}</td>
-      <td>${RU_WEEKDAYS[d.getDay()]}</td>
-      <td class="t-max">${fmtTemp(val.tmax)}</td>
-      <td class="t-min">${fmtTemp(val.tmin)}</td>
-      <td class="t-norm">${norm!==undefined?fmtTemp(norm):'—'}</td>
-      <td style="color:var(--muted)">${val.precip>0.1?val.precip.toFixed(1)+' мм':'—'}</td>
-      <td style="color:var(--muted);font-size:0.7rem">${val.source==='forecast'?'прогноз':'факт'}</td>
-    </tr>`;
-  }).join('');
-
-  document.getElementById('archive-container').innerHTML = `
-    <div class="table-wrap"><table>
-      <thead><tr><th>Дата</th><th>День</th><th>Макс</th><th>Мин</th><th>Норма макс</th><th>Осадки</th><th>Тип</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
-}
-
-/* ── Forecast ── */
-function renderForecast(data) {
-  const today = todayStr();
-  const {time, temperature_2m_max, temperature_2m_min, precipitation_sum, weathercode} = data.daily;
-  document.getElementById('forecast-grid').innerHTML = time.map((dt,i) => {
-    const d=new Date(dt+'T12:00:00'), isToday=dt===today, p=precipitation_sum[i];
-    return `<div class="forecast-day${isToday?' today':''}">
-      <span class="fday-date">${d.getDate()} ${RU_MONTHS_SHORT[d.getMonth()]}</span>
-      <div class="fday-weekday">${isToday?'Сегодня':RU_WEEKDAYS[d.getDay()]}</div>
-      <span class="fday-icon">${wmoIcon(weathercode[i])}</span>
-      <span class="fday-max">${fmtTemp(temperature_2m_max[i])}</span>
-      <span class="fday-min">${fmtTemp(temperature_2m_min[i])}</span>
-      ${p>0.1?`<span class="fday-precip">💧 ${p.toFixed(1)} мм</span>`:''}
-    </div>`;
-  }).join('');
-}
 
 /* ── Main load ── */
 async function loadData() {
   document.getElementById('chart-spinner').style.display='block';
   document.getElementById('tempChart').style.display='none';
-  ['forecast-grid','archive-container'].forEach(id=>document.getElementById(id).innerHTML='<div class="spinner">Загрузка…</div>');
 
   const year = new Date().getFullYear();
   const [forecastData, archiveYearData, hist5yr] = await Promise.all([
@@ -540,7 +478,7 @@ async function main() {
     console.error(err);
     document.getElementById('updated-at').textContent = 'Ошибка загрузки данных';
     const msg = `<div class="error-msg">Не удалось загрузить данные.<br><small>${err.message}</small></div>`;
-    document.getElementById('archive-container').innerHTML = msg;
+    document.getElementById('chart-spinner').textContent = 'Ошибка: ' + err.message;
   }
 }
 
