@@ -174,7 +174,7 @@
     /* Chart */
     .chart-wrap {
       position: relative;
-      height: 360px;
+      height: 480px;
     }
 
     /* Legend custom */
@@ -246,11 +246,22 @@
     <div id="updated-at">Загрузка данных…</div>
   </header>
 
-  <!-- Forecast -->
+  <!-- Annual chart — MAIN -->
   <div class="card">
-    <div class="section-title">Прогноз — Максимальные температуры на 14 дней</div>
-    <div id="forecast-grid" class="forecast-grid">
-      <div class="spinner">Загрузка прогноза…</div>
+    <div class="section-title">Максимальные температуры — <span id="chart-year">2026</span></div>
+    <div class="chart-legend">
+      <div class="legend-item">
+        <div class="legend-line current"></div>
+        <span id="legend-current-label">2026 (факт + прогноз)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line avg"></div>
+        <span>Среднее за 5 лет (2021–2025)</span>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chart-wrap">
+      <div class="spinner" id="chart-spinner">Загрузка данных…</div>
+      <canvas id="tempChart" style="display:none"></canvas>
     </div>
   </div>
 
@@ -262,21 +273,11 @@
     </div>
   </div>
 
-  <!-- Annual chart -->
+  <!-- Forecast -->
   <div class="card">
-    <div class="section-title">Максимальные температуры — год</div>
-    <div class="chart-legend">
-      <div class="legend-item">
-        <div class="legend-line current"></div>
-        <span id="legend-current-label">2026 (факт + прогноз)</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-line avg"></div>
-        <span>Среднее за 5 лет (2021–2025)</span>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="tempChart"></canvas>
+    <div class="section-title">Прогноз — Максимальные температуры на 14 дней</div>
+    <div id="forecast-grid" class="forecast-grid">
+      <div class="spinner">Загрузка прогноза…</div>
     </div>
   </div>
 
@@ -551,6 +552,8 @@ function buildChart(archiveCurrentYear, forecastData, historical5yr) {
   }
 
   // 4. Draw chart
+  document.getElementById('chart-spinner').style.display = 'none';
+  document.getElementById('tempChart').style.display = 'block';
   const ctx = document.getElementById('tempChart').getContext('2d');
   new Chart(ctx, {
     type: 'line',
