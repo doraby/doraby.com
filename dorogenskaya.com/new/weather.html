@@ -142,6 +142,37 @@
     .btn-primary { background: var(--accent); border: none; color: #fff; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
     .btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
 
+    /* ── Plant cards ── */
+    .plant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .plant-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .plant-card.ready   { border-color: #3fb950; }
+    .plant-card.soon    { border-color: #d29922; }
+    .plant-card.waiting { border-color: var(--border); opacity: 0.6; }
+    .plant-icon  { font-size: 2rem; line-height: 1; }
+    .plant-name  { font-size: 0.9rem; font-weight: 600; }
+    .plant-status {
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .plant-status.green  { color: #3fb950; }
+    .plant-status.yellow { color: #d29922; }
+    .plant-status.gray   { color: var(--muted); }
+    .plant-date-row { font-size: 0.78rem; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+    .plant-date-row span { display: flex; align-items: center; gap: 5px; }
+    .plant-moon  { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
     .spinner { color: var(--muted); text-align: center; padding: 40px 20px; font-size: 0.9rem; }
     .error-msg { color: #f85149; background: #1a1f2e; border: 1px solid #3d1c1c; border-radius: 8px; padding: 16px; font-size: 0.88rem; }
     .attribution { text-align: center; color: var(--muted); font-size: 0.72rem; padding: 12px 0 4px; }
@@ -183,6 +214,12 @@
       <div class="spinner" id="chart-spinner">Loading data…</div>
       <canvas id="tempChart" style="display:none"></canvas>
     </div>
+  </div>
+
+  <!-- Planting cards -->
+  <div class="card">
+    <div class="section-title">What to plant — based on this week's forecast</div>
+    <div id="plant-cards" class="plant-grid"></div>
   </div>
 
   <div class="attribution">
@@ -271,6 +308,7 @@ const G = {
   lat: +localStorage.getItem('wx_lat') || 50.0647,
   lon: +localStorage.getItem('wx_lon') || 19.9450,
   cityName: localStorage.getItem('wx_name') || 'Kraków',
+  forecastData: null,
   allActual: new Map(),
   allMin: new Map(),      // date → temperature_2m_min (2026 + forecast)
   allPrecip: new Map(),   // date → precipitation_sum (2026)
@@ -467,12 +505,91 @@ async function loadData() {
   document.getElementById('updated-at').textContent =
     `Updated: ${new Date().toLocaleString('en-GB',{timeZone:'Europe/Warsaw'})} • Open-Meteo`;
 
+  G.forecastData = forecastData;
   buildGlobalData(archiveYearData, forecastData, hist5yr);
 
   G.viewYear  = new Date().getFullYear();
   G.viewMonth = new Date().getMonth();
 
   renderChart();
+  renderPlantingCards();
+}
+
+/* ── Plant database ── */
+const PLANTS = [
+  { name: 'Spinach',   emoji: '🌿', minTemp: 0,  days: 35, type: 'leaf'  },
+  { name: 'Peas',      emoji: '🫛', minTemp: 0,  days: 70, type: 'fruit' },
+  { name: 'Lettuce',   emoji: '🥬', minTemp: 2,  days: 42, type: 'leaf'  },
+  { name: 'Radish',    emoji: '🌰', minTemp: 2,  days: 26, type: 'root'  },
+  { name: 'Carrots',   emoji: '🥕', minTemp: 4,  days: 90, type: 'root'  },
+  { name: 'Dill',      emoji: '🌱', minTemp: 5,  days: 45, type: 'leaf'  },
+  { name: 'Onion',     emoji: '🧅', minTemp: 5,  days: 100, type: 'root' },
+  { name: 'Potatoes',  emoji: '🥔', minTemp: 7,  days: 100, type: 'root' },
+  { name: 'Tomatoes',  emoji: '🍅', minTemp: 10, days: 90,  type: 'fruit'},
+  { name: 'Basil',     emoji: '🌿', minTemp: 12, days: 30,  type: 'leaf' },
+];
+
+/* ── Planting cards ── */
+function renderPlantingCards() {
+  const fd = G.forecastData?.daily;
+  if (!fd) return;
+
+  const today = todayStr();
+  // Build date→minTemp map from 14-day forecast
+  const minByDate = {};
+  fd.time.forEach((dt, i) => { minByDate[dt] = fd.temperature_2m_min[i]; });
+  const forecastDates = fd.time.slice().sort();
+
+  const cards = PLANTS.map(plant => {
+    // Find first forecast day where min temp >= plant requirement
+    const plantDate = forecastDates.find(dt => minByDate[dt] >= plant.minTemp) || null;
+    const daysUntil = plantDate
+      ? Math.round((new Date(plantDate) - new Date(today)) / 86400000)
+      : null;
+
+    let statusText, statusClass, cardClass;
+    if (daysUntil === null)      { statusText = 'Too cold this week'; statusClass = 'gray';   cardClass = 'waiting'; }
+    else if (daysUntil <= 1)     { statusText = 'Plant now ✓';        statusClass = 'green';  cardClass = 'ready';   }
+    else if (daysUntil <= 7)     { statusText = `In ${daysUntil} days`; statusClass = 'yellow'; cardClass = 'soon'; }
+    else                          { statusText = `In ${daysUntil} days`; statusClass = 'gray';   cardClass = 'waiting'; }
+
+    // Harvest date
+    let harvestStr = '—';
+    if (plantDate) {
+      const h = new Date(plantDate + 'T12:00:00');
+      h.setDate(h.getDate() + plant.days);
+      harvestStr = `${h.getDate()} ${RU_MONTHS_SHORT[h.getMonth()]} ${h.getFullYear()}`;
+    }
+
+    const plantStr = plantDate
+      ? `${new Date(plantDate+'T12:00:00').getDate()} ${RU_MONTHS_SHORT[new Date(plantDate+'T12:00:00').getMonth()]}`
+      : '—';
+
+    // Moon advice
+    const phase = plantDate ? getMoonPhaseDays(plantDate) : null;
+    let moonNote = '';
+    if (phase !== null) {
+      const wax = isWaxing(phase);
+      const goodForType = (plant.type === 'root' && !wax) || (plant.type !== 'root' && wax);
+      moonNote = goodForType
+        ? `${moonEmoji(phase)} good moon for ${plant.type}s`
+        : `${moonEmoji(phase)} better moon coming`;
+    }
+
+    return `
+      <div class="plant-card ${cardClass}">
+        <div class="plant-icon">${plant.emoji}</div>
+        <div class="plant-name">${plant.name}</div>
+        <div class="plant-status ${statusClass}">${statusText}</div>
+        <div class="plant-date-row">
+          <span>🌱 Plant: <strong>${plantStr}</strong></span>
+          <span>🌾 Harvest: <strong>${harvestStr}</strong></span>
+        </div>
+        ${moonNote ? `<div class="plant-moon">${moonNote}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  document.getElementById('plant-cards').innerHTML = cards;
 }
 
 async function main() {
