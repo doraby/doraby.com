@@ -172,6 +172,15 @@
     .plant-date-row { font-size: 0.78rem; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
     .plant-date-row span { display: flex; align-items: center; gap: 5px; }
     .plant-moon  { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .plant-guide-btn {
+      margin-top: 6px; background: none; border: 1px solid var(--border);
+      color: var(--muted); padding: 4px 10px; border-radius: 6px;
+      cursor: pointer; font-size: 0.75rem; transition: all 0.15s; width: 100%;
+    }
+    .plant-guide-btn:hover { border-color: var(--accent); color: var(--accent); }
+    #article-body p { margin-bottom: 12px; }
+    #article-body p:last-child { margin-bottom: 0; }
+    .article-loading { color: var(--muted); text-align: center; padding: 40px; }
 
     .spinner { color: var(--muted); text-align: center; padding: 40px 20px; font-size: 0.9rem; }
     .error-msg { color: #f85149; background: #1a1f2e; border: 1px solid #3d1c1c; border-radius: 8px; padding: 16px; font-size: 0.88rem; }
@@ -225,6 +234,44 @@
   <div class="attribution">
     Data: <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a> — CC BY 4.0 •
     Map: <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>
+  </div>
+</div>
+
+<!-- Article modal -->
+<div class="modal-overlay" id="article-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <h3 id="article-title">Plant guide</h3>
+      <button class="modal-close" id="btn-article-close">✕</button>
+    </div>
+    <div class="modal-body" id="article-body" style="font-size:0.9rem;line-height:1.7;color:var(--text)">
+    </div>
+  </div>
+</div>
+
+<!-- API key modal -->
+<div class="modal-overlay" id="apikey-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>Anthropic API Key</h3>
+      <button class="modal-close" id="btn-apikey-close">✕</button>
+    </div>
+    <div class="modal-body" style="gap:12px">
+      <p style="font-size:0.85rem;color:var(--muted)">
+        To generate planting guides, enter your Anthropic API key.<br>
+        It's saved locally in your browser and never sent anywhere except Anthropic.
+      </p>
+      <div class="search-row">
+        <input type="password" id="apikey-input" placeholder="sk-ant-…" />
+      </div>
+      <p style="font-size:0.75rem;color:var(--muted)">
+        Get a key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="btn-apikey-cancel">Cancel</button>
+      <button class="btn-primary" id="btn-apikey-save">Save & Generate</button>
+    </div>
   </div>
 </div>
 
@@ -515,6 +562,89 @@ async function loadData() {
   renderPlantingCards();
 }
 
+/* ── AI guide generation ── */
+let pendingPlant = null;
+
+function openArticleModal(plant, text) {
+  document.getElementById('article-title').textContent = `${plant.emoji} ${plant.name} — Growing Guide`;
+  const body = document.getElementById('article-body');
+  body.innerHTML = text.split('\n\n').filter(p=>p.trim())
+    .map(p=>`<p>${p.trim()}</p>`).join('');
+  document.getElementById('article-modal').classList.add('open');
+}
+
+async function generateGuide(plant) {
+  const apiKey = localStorage.getItem('wx_apikey');
+  if (!apiKey) {
+    pendingPlant = plant;
+    document.getElementById('apikey-modal').classList.add('open');
+    return;
+  }
+
+  document.getElementById('article-title').textContent = `${plant.emoji} ${plant.name} — Growing Guide`;
+  document.getElementById('article-body').innerHTML = '<div class="article-loading">Generating guide…</div>';
+  document.getElementById('article-modal').classList.add('open');
+
+  const month = RU_MONTHS_SHORT[new Date().getMonth()];
+  const prompt = `Write a practical 350-word growing guide for ${plant.name} in the ${G.cityName} region (Central Europe). Current month: ${month}. Min planting temp: ${plant.minTemp}°C. Days to harvest: ${plant.days}. Cover: soil preparation, seed selection tips, sowing depth & spacing, watering schedule, common pests/diseases, and harvest signs. Write in flowing paragraphs, no headers or bullet points.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 700,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    openArticleModal(plant, data.content[0].text);
+  } catch(e) {
+    document.getElementById('article-body').innerHTML =
+      `<div style="color:#f85149">Error: ${e.message}</div>`;
+  }
+}
+
+// Article modal close
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-article-close').onclick =
+    () => document.getElementById('article-modal').classList.remove('open');
+  document.getElementById('article-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+
+  // API key modal
+  document.getElementById('btn-apikey-close').onclick =
+  document.getElementById('btn-apikey-cancel').onclick =
+    () => document.getElementById('apikey-modal').classList.remove('open');
+
+  document.getElementById('btn-apikey-save').onclick = () => {
+    const key = document.getElementById('apikey-input').value.trim();
+    if (!key) return;
+    localStorage.setItem('wx_apikey', key);
+    document.getElementById('apikey-modal').classList.remove('open');
+    if (pendingPlant) { generateGuide(pendingPlant); pendingPlant = null; }
+  };
+
+  // Delegate guide button clicks
+  document.getElementById('plant-cards').addEventListener('click', e => {
+    const btn = e.target.closest('.plant-guide-btn');
+    if (btn) generateGuide(JSON.parse(btn.dataset.plant));
+  });
+});
+
 /* ── Plant database ── */
 const PLANTS = [
   { name: 'Spinach',   emoji: '🌿', minTemp: 0,  days: 35, type: 'leaf'  },
@@ -586,6 +716,7 @@ function renderPlantingCards() {
           <span>🌾 Harvest: <strong>${harvestStr}</strong></span>
         </div>
         ${moonNote ? `<div class="plant-moon">${moonNote}</div>` : ''}
+        <button class="plant-guide-btn" data-plant='${JSON.stringify({name:plant.name,emoji:plant.emoji,days:plant.days,minTemp:plant.minTemp,type:plant.type})}'>✨ Generate guide</button>
       </div>`;
   }).join('');
 
