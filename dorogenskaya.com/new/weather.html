@@ -268,7 +268,9 @@ Chart.register(moonPlugin);
 
 /* ── Global state ── */
 const G = {
-  lat: 50.0647, lon: 19.9450, cityName: 'Kraków',
+  lat: +localStorage.getItem('wx_lat') || 50.0647,
+  lon: +localStorage.getItem('wx_lon') || 19.9450,
+  cityName: localStorage.getItem('wx_name') || 'Kraków',
   allActual: new Map(),
   allMin: new Map(),      // date → temperature_2m_min (2026 + forecast)
   allPrecip: new Map(),   // date → precipitation_sum (2026)
@@ -474,6 +476,11 @@ async function loadData() {
 }
 
 async function main() {
+  // Restore saved location in header
+  if (localStorage.getItem('wx_name')) {
+    document.getElementById('page-title').innerHTML = `📍 ${G.cityName}`;
+    document.title = `Weather — ${G.cityName}`;
+  }
   try { await loadData(); }
   catch(err) {
     console.error(err);
@@ -587,6 +594,9 @@ document.getElementById('btn-modal-cancel').addEventListener('click', closeModal
 
 document.getElementById('btn-modal-confirm').addEventListener('click', async () => {
   G.lat = pendingLat; G.lon = pendingLon; G.cityName = pendingName;
+  localStorage.setItem('wx_lat', pendingLat);
+  localStorage.setItem('wx_lon', pendingLon);
+  localStorage.setItem('wx_name', pendingName);
   document.getElementById('page-title').innerHTML = `📍 ${pendingName}`;
   document.title = `Weather — ${pendingName}`;
   closeModal();
