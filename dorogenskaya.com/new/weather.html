@@ -377,7 +377,7 @@ function renderChart() {
     const phase = getMoonPhaseDays(dt);
     const precip = precipMonth.get(dt) ?? 0;
     const tmin = G.allMin.get(dt);
-    moonData.push({ moon: moonEmoji(phase), rain: precip > 1, plant: tmin !== undefined && tmin >= 0 });
+    moonData.push({ moon: moonEmoji(phase), rain: precip > 1, plant: isWaxing(phase) && precip > 1 && tmin !== undefined && tmin >= 0 });
   }
 
   document.getElementById('chart-month-label').textContent = `${RU_MONTHS[viewMonth]} ${viewYear}`;
