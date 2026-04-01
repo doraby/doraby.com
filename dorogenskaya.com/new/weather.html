@@ -185,12 +185,6 @@
     </div>
   </div>
 
-  <!-- Archive -->
-  <div class="card">
-    <div id="archive-title" class="section-title">Архив за текущий месяц</div>
-    <div id="archive-container"><div class="spinner">Загрузка архива…</div></div>
-  </div>
-
   <div class="attribution">
     Данные: <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a> — CC BY 4.0 •
     Карта: <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>
@@ -265,6 +259,7 @@ const moonPlugin = {
       const x = xs.getPixelForValue(i);
       ctx.fillText(d.moon, x, height - 10);
       if (d.plant) ctx.fillText('🌱', x, height - 24);
+      if (d.rain)  ctx.fillText('💧', x, height - 38);
     });
     ctx.restore();
   }
@@ -379,7 +374,7 @@ function renderChart() {
 
     const phase = getMoonPhaseDays(dt);
     const precip = precipMonth.get(dt) ?? 0;
-    moonData.push({ moon: moonEmoji(phase), plant: isWaxing(phase) && precip > 1 });
+    moonData.push({ moon: moonEmoji(phase), rain: precip > 1, plant: isWaxing(phase) && precip > 1 });
   }
 
   document.getElementById('chart-month-label').textContent = `${RU_MONTHS[viewMonth]} ${viewYear}`;
@@ -423,7 +418,7 @@ function renderChart() {
     ]},
     options: {
       responsive: true, maintainAspectRatio: false,
-      layout: { padding: { bottom: 36 } },
+      layout: { padding: { bottom: 52 } },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
@@ -522,9 +517,8 @@ async function loadData() {
   ['forecast-grid','archive-container'].forEach(id=>document.getElementById(id).innerHTML='<div class="spinner">Загрузка…</div>');
 
   const year = new Date().getFullYear();
-  const [forecastData, archiveMonthData, archiveYearData, hist5yr] = await Promise.all([
+  const [forecastData, archiveYearData, hist5yr] = await Promise.all([
     fetchJSON(urlForecast()),
-    fetchJSON(urlArchive(monthStart(), todayStr(), 'temperature_2m_max,temperature_2m_min,precipitation_sum')),
     fetchJSON(urlArchive(`${year}-01-01`, dateOffset(-2), 'temperature_2m_max,temperature_2m_min,precipitation_sum')),
     fetchJSON(urlArchive('2021-01-01','2025-12-31','temperature_2m_max')),
   ]);
@@ -538,7 +532,6 @@ async function loadData() {
   G.viewMonth = new Date().getMonth();
 
   renderChart();
-  renderArchive(archiveMonthData, forecastData);
 }
 
 async function main() {
