@@ -491,11 +491,46 @@ function renderChart() {
     }
   };
 
+  // Plugin: label the peak max and trough min
+  const peakLabelsPlugin = {
+    id: 'peakLabels',
+    afterDatasetsDraw(chart) {
+      const {ctx, scales: {x: xs, y: ys}, data} = chart;
+      const maxData = data.datasets[0].data;
+      const minData = data.datasets[1].data;
+
+      const maxVal = Math.max(...maxData.filter(v => v !== null));
+      const minVal = Math.min(...minData.filter(v => v !== null));
+      const maxIdx = maxData.indexOf(maxVal);
+      const minIdx = minData.indexOf(minVal);
+
+      ctx.save();
+      ctx.font = 'bold 11px -apple-system,BlinkMacSystemFont,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+
+      if (maxIdx !== -1 && isFinite(maxVal)) {
+        const x = xs.getPixelForValue(maxIdx);
+        const y = ys.getPixelForValue(maxVal);
+        ctx.fillStyle = '#f78166';
+        ctx.fillText((maxVal >= 0 ? '+' : '') + maxVal + '°', x, y - 4);
+      }
+      if (minIdx !== -1 && isFinite(minVal)) {
+        const x = xs.getPixelForValue(minIdx);
+        const y = ys.getPixelForValue(minVal);
+        ctx.fillStyle = '#79c0ff';
+        ctx.textBaseline = 'top';
+        ctx.fillText((minVal >= 0 ? '+' : '') + minVal + '°', x, y + 4);
+      }
+      ctx.restore();
+    }
+  };
+
   if (G.chartInst) G.chartInst.destroy();
   const ctx = document.getElementById('tempChart').getContext('2d');
   G.chartInst = new Chart(ctx, {
     type: 'line',
-    plugins: [mondayPlugin],
+    plugins: [mondayPlugin, peakLabelsPlugin],
     data: { labels, datasets: [
       { label: 'Max temp', data: dsActual, borderColor: '#f78166', backgroundColor: 'rgba(247,129,102,0.08)',
         borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25, fill: true, spanGaps: false, order: 1 },
